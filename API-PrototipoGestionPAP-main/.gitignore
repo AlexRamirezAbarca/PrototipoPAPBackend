@@ -1,0 +1,79 @@
+# Compilación de directorios y archivos
+bin/
+obj/
+out/
+
+# Configuraciones de usuario específicas
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Configuraciones de entorno de Visual Studio
+.vs/
+.idea/
+*.sln.iml
+
+# Resultados de pruebas y cobertura de código
+TestResults/
+*.coverage
+*.coveragexml
+*.log
+*.trx
+
+# Paquetes NuGet descargados localmente
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+# Archivos de publicación
+*.publishsettings
+publish/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos generados automáticamente por herramientas de análisis
+*.dotCover
+*.ncrunch*
+*.axd
+*.crash
+
+# Archivos temporales
+*~
+*.temp
+*.tmp
+*.bak
+*.old
+*.orig
+
+# Archivos de configuración y registro específicos de plataformas
+*.log
+*.tlog
+*.cache
+*.dbmdl
+*.mdf
+*.ldf
+
+# Configuraciones de herramientas de terceros
+*.tmproj
+*.tmps
+_UpgradeReport_Files/
+UpgradeLog*.XML
+UpgradeLog*.htm
+.idea/
+
+# Archivos de configuración locales
+.vscode/
+*.code-workspace
+
+# Directorios y archivos de Docker
+.dockerignore
+Dockerfile
+docker-compose*
+
+# Configuraciones para Azure
+*.azure*

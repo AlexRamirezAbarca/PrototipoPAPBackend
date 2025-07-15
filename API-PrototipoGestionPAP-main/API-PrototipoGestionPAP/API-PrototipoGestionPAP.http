@@ -1,0 +1,6 @@
+@API_PrototipoGestionPAP_HostAddress = http://localhost:5034
+
+GET {{API_PrototipoGestionPAP_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
