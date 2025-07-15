@@ -22,6 +22,8 @@ builder.Services.AddScoped<PermisosController>();
 builder.Services.AddScoped<EjeObjetivoPNService>();
 builder.Services.AddScoped<ObjetivoPoliticaPNService>();
 builder.Services.AddScoped<ObjetivoMetaPNService>();
+builder.Services.AddScoped<ProgramaInstitucionalPresupuestarioService>();
+builder.Services.AddScoped<ProgramaPresupuestarioProductoService>();
 //Fin Mantenedores
 
 builder.Services.AddCors(options =>

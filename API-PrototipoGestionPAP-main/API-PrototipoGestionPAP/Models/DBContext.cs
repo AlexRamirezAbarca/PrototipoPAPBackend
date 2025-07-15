@@ -72,6 +72,9 @@ public partial class DBContext : DbContext
     public virtual DbSet<EjeObjetivoPN> EjesObjetivosPN { get; set; }
     public virtual DbSet<ObjetivoPoliticaPN> ObjetivosPoliticasPN { get; set; }
     public virtual DbSet<ObjetivoMetaPN> ObjetivosMetasPN { get; set; }
+    public DbSet<ProgramaInstitucionalPresupuestario> ProgramasInstitucionalesPresupuestarios { get; set; }
+    public DbSet<ProgramaPresupuestarioProducto> ProgramasPresupuestariosProductos { get; set; }
+
 
     //Fin Mantenedores
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -1078,7 +1081,78 @@ public partial class DBContext : DbContext
             entity.HasIndex(e => new { e.ObjPnId, e.MetaPnId }).IsUnique();
         });
 
+        modelBuilder.Entity<ProgramaInstitucionalPresupuestario>(entity =>
+        {
+            entity.HasKey(e => e.ProgramaInstitucionalPresupuestarioId);
+            entity.ToTable("ProgramasInstitucionalesPresupuestarios");
 
+            entity.Property(e => e.ProgramaInstitucionalPresupuestarioId).HasColumnName("prog_inst_pre_id");
+
+            entity.Property(e => e.ProgramaInstId).HasColumnName("programa_inst_id");
+            entity.Property(e => e.ProgramaPreId).HasColumnName("programa_pre_id");
+
+            entity.Property(e => e.Estado)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasDefaultValue("A")
+                .IsFixedLength()
+                .HasColumnName("estado");
+
+            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
+            entity.Property(e => e.FechaCreacion)
+                .HasColumnName("fecha_creacion")
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
+            entity.Property(e => e.FechaModificacion)
+                .HasColumnName("fecha_modificacion")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.ProgramaInstitucional)
+                .WithMany()
+                .HasForeignKey(d => d.ProgramaInstId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProgramasInstPre_ProgramaInst");
+
+            entity.HasOne(d => d.ProgramaPresupuestario)
+                .WithMany()
+                .HasForeignKey(d => d.ProgramaPreId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProgramasInstPre_ProgramaPre");
+
+            entity.HasIndex(e => new { e.ProgramaInstId, e.ProgramaPreId }).IsUnique();
+        });
+
+        modelBuilder.Entity<ProgramaPresupuestarioProducto>(entity =>
+        {
+            entity.ToTable("ProgramasPresupuestariosProductos");
+
+            entity.HasKey(e => e.ProgPreProdId);
+
+            entity.Property(e => e.ProgPreProdId).HasColumnName("prog_pre_prod_id");
+            entity.Property(e => e.ProgramaPreId).HasColumnName("programa_pre_id");
+            entity.Property(e => e.ProductoInstId).HasColumnName("producto_inst_id");
+            entity.Property(e => e.Estado).HasMaxLength(1).IsUnicode(false).HasDefaultValue("A").IsFixedLength().HasColumnName("estado");
+            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
+            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("datetime").HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
+            entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("datetime");
+
+            entity.HasOne(d => d.ProgramaPresupuestario)
+                .WithMany()
+                .HasForeignKey(d => d.ProgramaPreId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProgramaPresupuestario");
+
+            entity.HasOne(d => d.ProductoInstitucional)
+                .WithMany()
+                .HasForeignKey(d => d.ProductoInstId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductoInstitucional");
+
+            entity.HasIndex(e => new { e.ProgramaPreId, e.ProductoInstId }).IsUnique();
+        });
 
 
         OnModelCreatingPartial(modelBuilder);
