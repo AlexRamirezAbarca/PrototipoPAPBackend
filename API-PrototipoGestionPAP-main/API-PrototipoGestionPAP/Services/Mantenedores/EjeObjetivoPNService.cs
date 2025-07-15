@@ -18,16 +18,24 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
         {
             return await _context.EjesObjetivosPN
                 .Where(x => x.Estado == "A")
+                .Include(x => x.Eje)
+                .Include(x => x.Objetivo)
                 .Select(x => new EjeObjetivoResponseDto
                 {
                     EjeObjetivoPnId = x.EjeObjetivoPnId,
+
                     EjePnId = x.EjePnId,
+                    EjeNombre = x.Eje.Nombre,
+
                     ObjPnId = x.ObjPnId,
+                    ObjetivoNombre = x.Objetivo.Nombre,
+
                     Estado = x.Estado,
                     FechaCreacion = x.FechaCreacion
                 })
                 .ToListAsync();
         }
+
 
         public async Task<string> CreateAsync(EjeObjetivoRequestDto dto)
         {
@@ -67,11 +75,18 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
         {
             return await _context.EjesObjetivosPN
                 .Where(x => x.EjePnId == ejeId && x.Estado == "A")
+                .Include(x => x.Eje)
+                .Include(x => x.Objetivo)
                 .Select(x => new EjeObjetivoResponseDto
                 {
                     EjeObjetivoPnId = x.EjeObjetivoPnId,
+
                     EjePnId = x.EjePnId,
+                    EjeNombre = x.Eje.Nombre,
+
                     ObjPnId = x.ObjPnId,
+                    ObjetivoNombre = x.Objetivo.Nombre,
+
                     Estado = x.Estado,
                     FechaCreacion = x.FechaCreacion
                 })

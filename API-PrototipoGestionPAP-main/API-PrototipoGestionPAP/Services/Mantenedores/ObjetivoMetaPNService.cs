@@ -19,11 +19,18 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
         {
             return await _context.ObjetivosMetasPN
                 .Where(x => x.Estado == "A")
+                .Include(x => x.Objetivo)
+                .Include(x => x.Meta)
                 .Select(x => new ObjetivoMetaResponseDto
                 {
                     ObjetivoMetaPnId = x.ObjetivoMetaPnId,
+
                     ObjPnId = x.ObjPnId,
+                    ObjPnNombre = x.Objetivo != null ? x.Objetivo.Nombre : string.Empty,
+
                     MetaPnId = x.MetaPnId,
+                    MetaPnNombre = x.Meta != null ? x.Meta.Nombre : string.Empty,
+
                     Estado = x.Estado,
                     FechaCreacion = x.FechaCreacion
                 })
@@ -68,11 +75,18 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
         {
             return await _context.ObjetivosMetasPN
                 .Where(x => x.ObjPnId == objPnId && x.Estado == "A")
+                .Include(x => x.Objetivo)
+                .Include(x => x.Meta)
                 .Select(x => new ObjetivoMetaResponseDto
                 {
                     ObjetivoMetaPnId = x.ObjetivoMetaPnId,
+
                     ObjPnId = x.ObjPnId,
+                    ObjPnNombre = x.Objetivo != null ? x.Objetivo.Nombre : string.Empty,
+
                     MetaPnId = x.MetaPnId,
+                    MetaPnNombre = x.Meta != null ? x.Meta.Nombre : string.Empty,
+
                     Estado = x.Estado,
                     FechaCreacion = x.FechaCreacion
                 })

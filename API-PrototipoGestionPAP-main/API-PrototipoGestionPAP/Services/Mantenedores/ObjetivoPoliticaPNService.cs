@@ -19,16 +19,24 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
         {
             return await _context.ObjetivosPoliticasPN
                 .Where(x => x.Estado == "A")
+                .Include(x => x.Objetivo)
+                .Include(x => x.Politica)
                 .Select(x => new ObjetivoPoliticaResponseDto
                 {
                     ObjetivoPoliticaPnId = x.ObjetivoPoliticaPnId,
+
                     ObjPnId = x.ObjPnId,
+                    ObjPnNombre = x.Objetivo != null ? x.Objetivo.Nombre : string.Empty,
+
                     PoliticaPnId = x.PoliticaPnId,
+                    PoliticaPnNombre = x.Politica != null ? x.Politica.Nombre : string.Empty,
+
                     Estado = x.Estado,
                     FechaCreacion = x.FechaCreacion
                 })
                 .ToListAsync();
         }
+       
 
         public async Task<string> CreateAsync(ObjetivoPoliticaRequestDto dto)
         {
@@ -68,11 +76,18 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
         {
             return await _context.ObjetivosPoliticasPN
                 .Where(x => x.ObjPnId == objPnId && x.Estado == "A")
+                .Include(x => x.Objetivo)
+                .Include(x => x.Politica)
                 .Select(x => new ObjetivoPoliticaResponseDto
                 {
                     ObjetivoPoliticaPnId = x.ObjetivoPoliticaPnId,
+
                     ObjPnId = x.ObjPnId,
+                    ObjPnNombre = x.Objetivo != null ? x.Objetivo.Nombre : string.Empty,
+
                     PoliticaPnId = x.PoliticaPnId,
+                    PoliticaPnNombre = x.Politica != null ? x.Politica.Nombre : string.Empty,
+
                     Estado = x.Estado,
                     FechaCreacion = x.FechaCreacion
                 })
