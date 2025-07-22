@@ -1,96 +1,117 @@
-﻿using API_PrototipoGestionPAP.Models;
-using API_PrototipoGestionPAP.Models.DTOs.Mantenedores.Inbound;
-using API_PrototipoGestionPAP.Models.DTOs.Mantenedores.Outbound;
+﻿using API_PrototipoGestionPAP.Application.DTOs;
+using API_PrototipoGestionPAP.Application.DTOs.Inbound;
+using API_PrototipoGestionPAP.Application.DTOs.Outbound;
+using API_PrototipoGestionPAP.Interfaces;
+using API_PrototipoGestionPAP.Models;
 using API_PrototipoGestionPAP.Models.Mantenedores;
 using Microsoft.EntityFrameworkCore;
 
 namespace API_PrototipoGestionPAP.Services.Mantenedores
 {
-    public class ObjetivoMetaPNService
+    public class ObjetivoMetaPnService : IObjetivoMetaPnService
     {
         private readonly DBContext _context;
 
-        public ObjetivoMetaPNService(DBContext context)
+        public ObjetivoMetaPnService(DBContext context)
         {
             _context = context;
         }
 
-        public async Task<List<ObjetivoMetaResponseDto>> GetAllAsync()
+        public async Task<ObjetivoMetaPnResponse?> GetByIdAsync(int id)
         {
-            return await _context.ObjetivosMetasPN
-                .Where(x => x.Estado == "A")
-                .Include(x => x.Objetivo)
-                .Include(x => x.Meta)
-                .Select(x => new ObjetivoMetaResponseDto
+            var relacion = await _context.ObjetivosMetasPN.FindAsync(id);
+            if (relacion == null || relacion.estado == "N")
+                return null;
+
+            return new ObjetivoMetaPnResponse
+            {
+                objetivo_meta_pn_id = relacion.objetivo_meta_pn_id,
+                obj_pn_id = relacion.obj_pn_id,
+                meta_pn_id = relacion.meta_pn_id,
+                estado = relacion.estado,
+                fecha_creacion = relacion.fecha_creacion
+            };
+        }
+
+        public async Task<PaginatedResponse<ObjetivoMetaPnResponse>> GetAllPaginatedAsync(int page, int pageSize)
+        {
+            var query = _context.ObjetivosMetasPN
+                .Where(x => x.estado == "A")
+                .AsNoTracking();
+
+            var totalRecords = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            var data = await query
+                .OrderByDescending(x => x.fecha_creacion)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => new ObjetivoMetaPnResponse
                 {
-                    ObjetivoMetaPnId = x.ObjetivoMetaPnId,
-
-                    ObjPnId = x.ObjPnId,
-                    ObjPnNombre = x.Objetivo != null ? x.Objetivo.Nombre : string.Empty,
-
-                    MetaPnId = x.MetaPnId,
-                    MetaPnNombre = x.Meta != null ? x.Meta.Nombre : string.Empty,
-
-                    Estado = x.Estado,
-                    FechaCreacion = x.FechaCreacion
+                    objetivo_meta_pn_id = x.objetivo_meta_pn_id,
+                    obj_pn_id = x.obj_pn_id,
+                    meta_pn_id = x.meta_pn_id,
+                    estado = x.estado,
+                    fecha_creacion = x.fecha_creacion
                 })
                 .ToListAsync();
+
+            return new PaginatedResponse<ObjetivoMetaPnResponse>
+            {
+                Data = data,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = totalPages
+            };
         }
 
-        public async Task<string> CreateAsync(ObjetivoMetaRequestDto dto)
+        public async Task<ObjetivoMetaPnResponse> CreateAsync(CreateObjetivoMetaPnRequest request)
         {
-            var exists = await _context.ObjetivosMetasPN
-                .AnyAsync(x => x.ObjPnId == dto.ObjPnId && x.MetaPnId == dto.MetaPnId && x.Estado == "A");
-
-            if (exists)
-                return "Esta relación ya existe.";
-
-            var entity = new ObjetivoMetaPN
+            var nuevaRelacion = new ObjetivoMetaPN
             {
-                ObjPnId = dto.ObjPnId,
-                MetaPnId = dto.MetaPnId,
-                CreadoPor = dto.CreadoPor
+                obj_pn_id = request.obj_pn_id,
+                meta_pn_id = request.meta_pn_id,
+                estado = "A",
+                fecha_creacion = DateTime.UtcNow
             };
 
-            _context.ObjetivosMetasPN.Add(entity);
+            _context.ObjetivosMetasPN.Add(nuevaRelacion);
             await _context.SaveChangesAsync();
 
-            return "Relación creada correctamente.";
+            return new ObjetivoMetaPnResponse
+            {
+                objetivo_meta_pn_id = nuevaRelacion.objetivo_meta_pn_id,
+                obj_pn_id = nuevaRelacion.obj_pn_id,
+                meta_pn_id = nuevaRelacion.meta_pn_id,
+                estado = nuevaRelacion.estado,
+                fecha_creacion = nuevaRelacion.fecha_creacion
+            };
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> UpdateAsync(int id, CreateObjetivoMetaPnRequest request)
         {
-            var entity = await _context.ObjetivosMetasPN.FindAsync(id);
-            if (entity == null || entity.Estado != "A")
+            var relacion = await _context.ObjetivosMetasPN.FindAsync(id);
+            if (relacion == null || relacion.estado == "N")
                 return false;
 
-            entity.Estado = "I";
-            entity.FechaModificacion = DateTime.Now;
+            relacion.obj_pn_id = request.obj_pn_id;
+            relacion.meta_pn_id = request.meta_pn_id;
+            relacion.fecha_modificacion = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<List<ObjetivoMetaResponseDto>> GetByObjetivoIdAsync(int objPnId)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return await _context.ObjetivosMetasPN
-                .Where(x => x.ObjPnId == objPnId && x.Estado == "A")
-                .Include(x => x.Objetivo)
-                .Include(x => x.Meta)
-                .Select(x => new ObjetivoMetaResponseDto
-                {
-                    ObjetivoMetaPnId = x.ObjetivoMetaPnId,
+            var relacion = await _context.ObjetivosMetasPN.FindAsync(id);
+            if (relacion == null)
+                return false;
 
-                    ObjPnId = x.ObjPnId,
-                    ObjPnNombre = x.Objetivo != null ? x.Objetivo.Nombre : string.Empty,
-
-                    MetaPnId = x.MetaPnId,
-                    MetaPnNombre = x.Meta != null ? x.Meta.Nombre : string.Empty,
-
-                    Estado = x.Estado,
-                    FechaCreacion = x.FechaCreacion
-                })
-                .ToListAsync();
+            _context.ObjetivosMetasPN.Remove(relacion);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

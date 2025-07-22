@@ -68,15 +68,15 @@ public partial class DBContext : DbContext
 
     public virtual DbSet<Usuarios> Usuarios { get; set; }
 
-    //Mantenedores
-    public virtual DbSet<EjeObjetivoPN> EjesObjetivosPN { get; set; }
+    ////Mantenedores
+    public virtual DbSet<EjeObjetivoPN> EjesObjetivosPN { get; set; } = null!;
     public virtual DbSet<ObjetivoPoliticaPN> ObjetivosPoliticasPN { get; set; }
     public virtual DbSet<ObjetivoMetaPN> ObjetivosMetasPN { get; set; }
-    public DbSet<ProgramaInstitucionalPresupuestario> ProgramasInstitucionalesPresupuestarios { get; set; }
-    public DbSet<ProgramaPresupuestarioProducto> ProgramasPresupuestariosProductos { get; set; }
+    //public DbSet<ProgramaInstitucionalPresupuestario> ProgramasInstitucionalesPresupuestarios { get; set; }
+    //public DbSet<ProgramaPresupuestarioProducto> ProgramasPresupuestariosProductos { get; set; }
 
 
-    //Fin Mantenedores
+    ////Fin Mantenedores
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Acciones>(entity =>
@@ -995,164 +995,183 @@ public partial class DBContext : DbContext
 
         modelBuilder.Entity<EjeObjetivoPN>(entity =>
         {
-            entity.HasKey(e => e.EjeObjetivoPnId);
-
             entity.ToTable("EjesObjetivosPN");
 
-            entity.Property(e => e.EjeObjetivoPnId).HasColumnName("eje_objetivo_pn_id");
-            entity.Property(e => e.EjePnId).HasColumnName("eje_pn_id");
-            entity.Property(e => e.ObjPnId).HasColumnName("obj_pn_id");
-            entity.Property(e => e.Estado).HasMaxLength(1).IsUnicode(false).HasDefaultValue("A").IsFixedLength().HasColumnName("estado");
-            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
-            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
-            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("datetime").HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("datetime");
+            entity.HasKey(e => e.eje_objetivo_pn_id);
 
-            entity.HasOne(d => d.Eje)
+            entity.Property(e => e.eje_objetivo_pn_id)
+                .HasColumnName("eje_objetivo_pn_id");
+
+            entity.Property(e => e.eje_pn_id)
+                .HasColumnName("eje_pn_id");
+
+            entity.Property(e => e.obj_pn_id)
+                .HasColumnName("obj_pn_id");
+
+            entity.Property(e => e.estado)
+                .HasColumnName("estado")
+                .IsRequired()
+                .HasMaxLength(1)
+                .IsUnicode(false);
+
+            entity.Property(e => e.fecha_creacion)
+                .HasColumnName("fecha_creacion")
+                .HasDefaultValueSql("GETDATE()");
+
+            entity.Property(e => e.fecha_modificacion)
+                .HasColumnName("fecha_modificacion");
+
+            entity.HasOne(e => e.Eje)
                 .WithMany()
-                .HasForeignKey(d => d.EjePnId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_EjesObjetivosPN_Eje");
+                .HasForeignKey(e => e.eje_pn_id)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(d => d.Objetivo)
+            entity.HasOne(e => e.Objetivo)
                 .WithMany()
-                .HasForeignKey(d => d.ObjPnId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_EjesObjetivosPN_Objetivo");
-
-            entity.HasIndex(e => new { e.EjePnId, e.ObjPnId }).IsUnique(); // para evitar duplicados
+                .HasForeignKey(e => e.obj_pn_id)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ObjetivoPoliticaPN>(entity =>
         {
-            entity.HasKey(e => e.ObjetivoPoliticaPnId);
             entity.ToTable("ObjetivosPoliticasPN");
 
-            entity.Property(e => e.ObjetivoPoliticaPnId).HasColumnName("objetivo_politica_pn_id");
-            entity.Property(e => e.ObjPnId).HasColumnName("obj_pn_id");
-            entity.Property(e => e.PoliticaPnId).HasColumnName("politica_pn_id");
-            entity.Property(e => e.Estado).HasMaxLength(1).IsUnicode(false).HasDefaultValue("A").IsFixedLength().HasColumnName("estado");
-            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
-            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("datetime").HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
-            entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("datetime");
+            entity.HasKey(e => e.objetivo_politica_pn_id);
 
-            entity.HasOne(d => d.Objetivo)
+            entity.Property(e => e.estado)
+                .IsRequired()
+                .HasMaxLength(1)
+                .IsUnicode(false);
+
+            entity.Property(e => e.fecha_creacion)
+                .HasColumnName("fecha_creacion")
+                .HasDefaultValueSql("GETDATE()");
+
+            entity.Property(e => e.fecha_modificacion)
+                .HasColumnName("fecha_modificacion");
+
+            entity.HasOne(e => e.Objetivo)
                 .WithMany()
-                .HasForeignKey(d => d.ObjPnId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ObjetivosPoliticasPN_Objetivo");
+                .HasForeignKey(e => e.obj_pn_id)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(d => d.Politica)
+            entity.HasOne(e => e.Politica)
                 .WithMany()
-                .HasForeignKey(d => d.PoliticaPnId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ObjetivosPoliticasPN_Politica");
-
-            entity.HasIndex(e => new { e.ObjPnId, e.PoliticaPnId }).IsUnique();
+                .HasForeignKey(e => e.politica_pn_id)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ObjetivoMetaPN>(entity =>
         {
-            entity.HasKey(e => e.ObjetivoMetaPnId);
             entity.ToTable("ObjetivosMetasPN");
 
-            entity.Property(e => e.ObjetivoMetaPnId).HasColumnName("objetivo_meta_pn_id");
-            entity.Property(e => e.ObjPnId).HasColumnName("obj_pn_id");
-            entity.Property(e => e.MetaPnId).HasColumnName("meta_pn_id");
-            entity.Property(e => e.Estado).HasMaxLength(1).IsUnicode(false).HasDefaultValue("A").IsFixedLength().HasColumnName("estado");
-            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
-            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("datetime").HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
-            entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("datetime");
+            entity.HasKey(e => e.objetivo_meta_pn_id);
 
-            entity.HasOne(d => d.Objetivo)
-                .WithMany()
-                .HasForeignKey(d => d.ObjPnId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ObjetivosMetasPN_Objetivo");
+            entity.Property(e => e.objetivo_meta_pn_id)
+                .HasColumnName("objetivo_meta_pn_id");
 
-            entity.HasOne(d => d.Meta)
-                .WithMany()
-                .HasForeignKey(d => d.MetaPnId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ObjetivosMetasPN_Meta");
+            entity.Property(e => e.obj_pn_id)
+                .HasColumnName("obj_pn_id");
 
-            entity.HasIndex(e => new { e.ObjPnId, e.MetaPnId }).IsUnique();
-        });
+            entity.Property(e => e.meta_pn_id)
+                .HasColumnName("meta_pn_id");
 
-        modelBuilder.Entity<ProgramaInstitucionalPresupuestario>(entity =>
-        {
-            entity.HasKey(e => e.ProgramaInstitucionalPresupuestarioId);
-            entity.ToTable("ProgramasInstitucionalesPresupuestarios");
-
-            entity.Property(e => e.ProgramaInstitucionalPresupuestarioId).HasColumnName("prog_inst_pre_id");
-
-            entity.Property(e => e.ProgramaInstId).HasColumnName("programa_inst_id");
-            entity.Property(e => e.ProgramaPreId).HasColumnName("programa_pre_id");
-
-            entity.Property(e => e.Estado)
+            entity.Property(e => e.estado)
+                .IsRequired()
                 .HasMaxLength(1)
                 .IsUnicode(false)
-                .HasDefaultValue("A")
-                .IsFixedLength()
                 .HasColumnName("estado");
 
-            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
-            entity.Property(e => e.FechaCreacion)
-                .HasColumnName("fecha_creacion")
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.fecha_creacion)
+                .HasDefaultValueSql("GETDATE()")
+                .HasColumnName("fecha_creacion");
 
-            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
-            entity.Property(e => e.FechaModificacion)
-                .HasColumnName("fecha_modificacion")
-                .HasColumnType("datetime");
+            entity.Property(e => e.fecha_modificacion)
+                .HasColumnName("fecha_modificacion");
 
-            entity.HasOne(d => d.ProgramaInstitucional)
+            entity.HasOne(e => e.Objetivo)
                 .WithMany()
-                .HasForeignKey(d => d.ProgramaInstId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProgramasInstPre_ProgramaInst");
+                .HasForeignKey(e => e.obj_pn_id)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(d => d.ProgramaPresupuestario)
+            entity.HasOne(e => e.Meta)
                 .WithMany()
-                .HasForeignKey(d => d.ProgramaPreId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProgramasInstPre_ProgramaPre");
-
-            entity.HasIndex(e => new { e.ProgramaInstId, e.ProgramaPreId }).IsUnique();
+                .HasForeignKey(e => e.meta_pn_id)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<ProgramaPresupuestarioProducto>(entity =>
-        {
-            entity.ToTable("ProgramasPresupuestariosProductos");
+        //modelBuilder.Entity<ProgramaInstitucionalPresupuestario>(entity =>
+        //{
+        //    entity.HasKey(e => e.ProgramaInstitucionalPresupuestarioId);
+        //    entity.ToTable("ProgramasInstitucionalesPresupuestarios");
 
-            entity.HasKey(e => e.ProgPreProdId);
+        //    entity.Property(e => e.ProgramaInstitucionalPresupuestarioId).HasColumnName("prog_inst_pre_id");
 
-            entity.Property(e => e.ProgPreProdId).HasColumnName("prog_pre_prod_id");
-            entity.Property(e => e.ProgramaPreId).HasColumnName("programa_pre_id");
-            entity.Property(e => e.ProductoInstId).HasColumnName("producto_inst_id");
-            entity.Property(e => e.Estado).HasMaxLength(1).IsUnicode(false).HasDefaultValue("A").IsFixedLength().HasColumnName("estado");
-            entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
-            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("datetime").HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
-            entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("datetime");
+        //    entity.Property(e => e.ProgramaInstId).HasColumnName("programa_inst_id");
+        //    entity.Property(e => e.ProgramaPreId).HasColumnName("programa_pre_id");
 
-            entity.HasOne(d => d.ProgramaPresupuestario)
-                .WithMany()
-                .HasForeignKey(d => d.ProgramaPreId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProgramaPresupuestario");
+        //    entity.Property(e => e.Estado)
+        //        .HasMaxLength(1)
+        //        .IsUnicode(false)
+        //        .HasDefaultValue("A")
+        //        .IsFixedLength()
+        //        .HasColumnName("estado");
 
-            entity.HasOne(d => d.ProductoInstitucional)
-                .WithMany()
-                .HasForeignKey(d => d.ProductoInstId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProductoInstitucional");
+        //    entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
+        //    entity.Property(e => e.FechaCreacion)
+        //        .HasColumnName("fecha_creacion")
+        //        .HasColumnType("datetime")
+        //        .HasDefaultValueSql("(getdate())");
 
-            entity.HasIndex(e => new { e.ProgramaPreId, e.ProductoInstId }).IsUnique();
-        });
+        //    entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
+        //    entity.Property(e => e.FechaModificacion)
+        //        .HasColumnName("fecha_modificacion")
+        //        .HasColumnType("datetime");
+
+        //    entity.HasOne(d => d.ProgramaInstitucional)
+        //        .WithMany()
+        //        .HasForeignKey(d => d.ProgramaInstId)
+        //        .OnDelete(DeleteBehavior.Cascade)
+        //        .HasConstraintName("FK_ProgramasInstPre_ProgramaInst");
+
+        //    entity.HasOne(d => d.ProgramaPresupuestario)
+        //        .WithMany()
+        //        .HasForeignKey(d => d.ProgramaPreId)
+        //        .OnDelete(DeleteBehavior.Cascade)
+        //        .HasConstraintName("FK_ProgramasInstPre_ProgramaPre");
+
+        //    entity.HasIndex(e => new { e.ProgramaInstId, e.ProgramaPreId }).IsUnique();
+        //});
+
+        //modelBuilder.Entity<ProgramaPresupuestarioProducto>(entity =>
+        //{
+        //    entity.ToTable("ProgramasPresupuestariosProductos");
+
+        //    entity.HasKey(e => e.ProgPreProdId);
+
+        //    entity.Property(e => e.ProgPreProdId).HasColumnName("prog_pre_prod_id");
+        //    entity.Property(e => e.ProgramaPreId).HasColumnName("programa_pre_id");
+        //    entity.Property(e => e.ProductoInstId).HasColumnName("producto_inst_id");
+        //    entity.Property(e => e.Estado).HasMaxLength(1).IsUnicode(false).HasDefaultValue("A").IsFixedLength().HasColumnName("estado");
+        //    entity.Property(e => e.CreadoPor).HasColumnName("creado_por");
+        //    entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").HasColumnType("datetime").HasDefaultValueSql("(getdate())");
+        //    entity.Property(e => e.ModificadoPor).HasColumnName("modificado_por");
+        //    entity.Property(e => e.FechaModificacion).HasColumnName("fecha_modificacion").HasColumnType("datetime");
+
+        //    entity.HasOne(d => d.ProgramaPresupuestario)
+        //        .WithMany()
+        //        .HasForeignKey(d => d.ProgramaPreId)
+        //        .OnDelete(DeleteBehavior.Cascade)
+        //        .HasConstraintName("FK_ProgramaPresupuestario");
+
+        //    entity.HasOne(d => d.ProductoInstitucional)
+        //        .WithMany()
+        //        .HasForeignKey(d => d.ProductoInstId)
+        //        .OnDelete(DeleteBehavior.Cascade)
+        //        .HasConstraintName("FK_ProductoInstitucional");
+
+        //    entity.HasIndex(e => new { e.ProgramaPreId, e.ProductoInstId }).IsUnique();
+        //});
 
 
         OnModelCreatingPartial(modelBuilder);

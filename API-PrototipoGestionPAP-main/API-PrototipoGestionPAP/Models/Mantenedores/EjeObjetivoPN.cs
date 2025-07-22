@@ -1,22 +1,21 @@
-﻿namespace API_PrototipoGestionPAP.Models.Mantenedores
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace API_PrototipoGestionPAP.Models.Mantenedores
 {
     public class EjeObjetivoPN
     {
-        public int EjeObjetivoPnId { get; set; }
+        public int eje_objetivo_pn_id { get; set; }
 
-        public int EjePnId { get; set; }
-        public int ObjPnId { get; set; }
+        public int eje_pn_id { get; set; }
+        public int obj_pn_id { get; set; }
 
-        public string Estado { get; set; } = "A";
-        public int? CreadoPor { get; set; }
-        public DateTime FechaCreacion { get; set; } = DateTime.Now;
-        public int? ModificadoPor { get; set; }
-        public DateTime? FechaModificacion { get; set; }
+        public string estado { get; set; } = "A";
+        public DateTime fecha_creacion { get; set; } = DateTime.Now;
+        public DateTime? fecha_modificacion { get; set; }
 
-
-        // Relaciones con navegación
-        public virtual EjesPlanNacionalDesarrollo Eje { get; set; } = null!;
-        public virtual ObjetivosPlanNacionalDesarrollo Objetivo { get; set; } = null!;
+        // Relaciones de navegación opcionales
+        public virtual EjesPlanNacionalDesarrollo? Eje { get; set; }
+        public virtual ObjetivosPlanNacionalDesarrollo? Objetivo { get; set; }
     }
 
 }

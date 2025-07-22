@@ -1,6 +1,10 @@
 using API_PrototipoGestionPAP.Controllers;
+using API_PrototipoGestionPAP.Interfaces;
 using API_PrototipoGestionPAP.Models;
+using API_PrototipoGestionPAP.Services;
 using API_PrototipoGestionPAP.Services.Mantenedores;
+
+//using API_PrototipoGestionPAP.Services.Mantenedores;
 using API_PrototipoGestionPAP.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -19,22 +23,36 @@ builder.Services.AddScoped<PersonasController>();
 builder.Services.AddScoped<PermisosController>();
 
 //Inicio Mantenedores
-builder.Services.AddScoped<EjeObjetivoPNService>();
-builder.Services.AddScoped<ObjetivoPoliticaPNService>();
-builder.Services.AddScoped<ObjetivoMetaPNService>();
-builder.Services.AddScoped<ProgramaInstitucionalPresupuestarioService>();
-builder.Services.AddScoped<ProgramaPresupuestarioProductoService>();
+builder.Services.AddScoped<IEjePnService, EjePnService>();
+builder.Services.AddScoped<IObjetivoPnService, ObjetivoPnService>();
+builder.Services.AddScoped<IMetaPnService, MetaPnService>();
+builder.Services.AddScoped<IPoliticaPnService, PoliticaPnService>();
+builder.Services.AddScoped<IEjeObjetivoPnService, EjeObjetivoPnService>();
+builder.Services.AddScoped<IObjetivoPoliticaService, ObjetivoPoliticaService>();
+builder.Services.AddScoped<IObjetivoMetaPnService, ObjetivoMetaPnService>();
 //Fin Mantenedores
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("MyCorsPolicy", policy =>
+//    {
+//        policy
+//            .WithOrigins("https://web-app-prototipogestionpap20250108223848.azurewebsites.net", "http://localhost:5278")
+//            .AllowAnyMethod()
+//            .AllowAnyHeader();
+//    });
+//});
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("MyCorsPolicy", policy =>
-    {
-        policy
-            .WithOrigins("https://web-app-prototipogestionpap20250108223848.azurewebsites.net", "http://localhost:5278")
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200", "https://web-app-prototipogestionpap20250108223848.azurewebsites.net", "http://localhost:5278") // <-- Tu frontend
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // Si usas cookies/token
+        });
 });
 
 // Configurar la autenticación JWT
@@ -121,4 +139,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors("AllowFrontend");
 app.Run();

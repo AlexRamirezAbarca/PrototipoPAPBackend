@@ -2,17 +2,16 @@
 {
     public class ObjetivoMetaPN
     {
-        public int ObjetivoMetaPnId { get; set; }
-        public int ObjPnId { get; set; }
-        public int MetaPnId { get; set; }
+        public int objetivo_meta_pn_id { get; set; }
 
-        public string Estado { get; set; } = "A";
-        public string? CreadoPor { get; set; }
-        public DateTime FechaCreacion { get; set; } = DateTime.Now;
-        public string? ModificadoPor { get; set; }
-        public DateTime? FechaModificacion { get; set; }
+        public int obj_pn_id { get; set; }
+        public int meta_pn_id { get; set; }
 
-        // Relaciones de navegación
+        public string estado { get; set; } = "A";
+        public DateTime fecha_creacion { get; set; } = DateTime.Now;
+        public DateTime? fecha_modificacion { get; set; }
+
+        // Relaciones de navegación opcionales
         public virtual ObjetivosPlanNacionalDesarrollo? Objetivo { get; set; }
         public virtual MetasPlanNacionalDesarrollo? Meta { get; set; }
     }

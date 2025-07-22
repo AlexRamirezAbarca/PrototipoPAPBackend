@@ -8,34 +8,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API_PrototipoGestionPAP.Services.Mantenedores
 {
-    public class EjeObjetivoPnService : IEjeObjetivoPnService
+    public class ObjetivoPoliticaService : IObjetivoPoliticaService
     {
         private readonly DBContext _context;
 
-        public EjeObjetivoPnService(DBContext context)
+        public ObjetivoPoliticaService(DBContext context)
         {
             _context = context;
         }
 
-        public async Task<EjeObjetivoPnResponse?> GetByIdAsync(int id)
+        public async Task<ObjetivoPoliticaResponse?> GetByIdAsync(int id)
         {
-            var relacion = await _context.EjesObjetivosPN.FindAsync(id);
+            var relacion = await _context.ObjetivosPoliticasPN.FindAsync(id);
             if (relacion == null || relacion.estado == "N")
                 return null;
 
-            return new EjeObjetivoPnResponse
+            return new ObjetivoPoliticaResponse
             {
-                EjeObjetivoPnId = relacion.eje_objetivo_pn_id,
-                EjePnId = relacion.eje_pn_id,
+                ObjetivoPoliticaPnId = relacion.objetivo_politica_pn_id,
                 ObjPnId = relacion.obj_pn_id,
+                PoliticaPnId = relacion.politica_pn_id,
                 Estado = relacion.estado,
                 FechaCreacion = relacion.fecha_creacion
             };
         }
 
-        public async Task<PaginatedResponse<EjeObjetivoPnResponse>> GetAllPaginatedAsync(int page, int pageSize)
+        public async Task<PaginatedResponse<ObjetivoPoliticaResponse>> GetAllPaginatedAsync(int page, int pageSize)
         {
-            var query = _context.EjesObjetivosPN
+            var query = _context.ObjetivosPoliticasPN
                 .Where(x => x.estado == "A")
                 .AsNoTracking();
 
@@ -46,17 +46,17 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
                 .OrderByDescending(x => x.fecha_creacion)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(x => new EjeObjetivoPnResponse
+                .Select(x => new ObjetivoPoliticaResponse
                 {
-                    EjeObjetivoPnId = x.eje_objetivo_pn_id,
-                    EjePnId = x.eje_pn_id,
+                    ObjetivoPoliticaPnId = x.objetivo_politica_pn_id,
                     ObjPnId = x.obj_pn_id,
+                    PoliticaPnId = x.politica_pn_id,
                     Estado = x.estado,
                     FechaCreacion = x.fecha_creacion
                 })
                 .ToListAsync();
 
-            return new PaginatedResponse<EjeObjetivoPnResponse>
+            return new PaginatedResponse<ObjetivoPoliticaResponse>
             {
                 Data = data,
                 CurrentPage = page,
@@ -66,37 +66,37 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
             };
         }
 
-        public async Task<EjeObjetivoPnResponse> CreateAsync(CreateEjeObjetivoPnRequest request)
+        public async Task<ObjetivoPoliticaResponse> CreateAsync(CreateObjetivoPoliticaRequest request)
         {
-            var nuevaRelacion = new EjeObjetivoPN
+            var relacion = new ObjetivoPoliticaPN
             {
-                eje_pn_id = request.EjePnId,
                 obj_pn_id = request.ObjPnId,
+                politica_pn_id = request.ObjPnId,
                 estado = "A",
                 fecha_creacion = DateTime.UtcNow
             };
 
-            _context.EjesObjetivosPN.Add(nuevaRelacion);
+            _context.ObjetivosPoliticasPN.Add(relacion);
             await _context.SaveChangesAsync();
 
-            return new EjeObjetivoPnResponse
+            return new ObjetivoPoliticaResponse
             {
-                EjeObjetivoPnId = nuevaRelacion.eje_objetivo_pn_id,
-                EjePnId = nuevaRelacion.eje_pn_id,
-                ObjPnId = nuevaRelacion.obj_pn_id,
-                Estado = nuevaRelacion.estado,
-                FechaCreacion = nuevaRelacion.fecha_creacion
+                ObjetivoPoliticaPnId = relacion.objetivo_politica_pn_id,
+                ObjPnId = relacion.obj_pn_id,
+                PoliticaPnId = relacion.politica_pn_id,
+                Estado = relacion.estado,
+                FechaCreacion = relacion.fecha_creacion
             };
         }
 
-        public async Task<bool> UpdateAsync(int id, CreateEjeObjetivoPnRequest request)
+        public async Task<bool> UpdateAsync(int id, CreateObjetivoPoliticaRequest request)
         {
-            var relacion = await _context.EjesObjetivosPN.FindAsync(id);
+            var relacion = await _context.ObjetivosPoliticasPN.FindAsync(id);
             if (relacion == null || relacion.estado == "N")
                 return false;
 
-            relacion.eje_pn_id = request.EjePnId;
             relacion.obj_pn_id = request.ObjPnId;
+            relacion.politica_pn_id = request.PoliticaPnId;
             relacion.fecha_modificacion = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -105,14 +105,13 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var relacion = await _context.EjesObjetivosPN.FindAsync(id);
+            var relacion = await _context.ObjetivosPoliticasPN.FindAsync(id);
             if (relacion == null)
                 return false;
 
-            _context.EjesObjetivosPN.Remove(relacion);
+            _context.ObjetivosPoliticasPN.Remove(relacion);
             await _context.SaveChangesAsync();
             return true;
         }
     }
-
 }
