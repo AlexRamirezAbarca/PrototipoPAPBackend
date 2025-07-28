@@ -89,6 +89,9 @@ namespace API_PrototipoGestionPAP.Services
 
             return new PaginatedResponse<PoliticaPnResponse>
             {
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)total / pageSize),
                 TotalRecords = total,
                 Data = data
             };

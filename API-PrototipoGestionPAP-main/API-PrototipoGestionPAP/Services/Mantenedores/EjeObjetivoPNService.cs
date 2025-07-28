@@ -33,30 +33,72 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
             };
         }
 
-        public async Task<PaginatedResponse<EjeObjetivoPnResponse>> GetAllPaginatedAsync(int page, int pageSize)
+        public async Task<PaginatedResponse<EjeObjetivoPnExtendedResponse>> GetAllPaginatedAsync(int page, int pageSize)
         {
             var query = _context.EjesObjetivosPN
-                .Where(x => x.estado == "A")
+                .Include(eo => eo.Eje)
+                .Include(eo => eo.Objetivo)
+                .Where(eo => eo.estado == "A")
                 .AsNoTracking();
 
             var totalRecords = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
 
-            var data = await query
+            var relaciones = await query
                 .OrderByDescending(x => x.fecha_creacion)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(x => new EjeObjetivoPnResponse
-                {
-                    EjeObjetivoPnId = x.eje_objetivo_pn_id,
-                    EjePnId = x.eje_pn_id,
-                    ObjPnId = x.obj_pn_id,
-                    Estado = x.estado,
-                    FechaCreacion = x.fecha_creacion
-                })
                 .ToListAsync();
 
-            return new PaginatedResponse<EjeObjetivoPnResponse>
+            var data = new List<EjeObjetivoPnExtendedResponse>();
+
+            foreach (var relacion in relaciones)
+            {
+                var metas = await _context.ObjetivosMetasPN
+                    .Where(om => om.obj_pn_id == relacion.obj_pn_id && om.estado == "A")
+                    .Include(om => om.Meta)
+                    .Select(m => new MetaSimpleDto
+                    {
+                        MetaPnId = m.Meta.MetaPnId,
+                        Nombre = m.Meta.Nombre,
+                        Descripcion = m.Meta.Descripcion
+                    })
+                    .ToListAsync();
+
+                var politicas = await _context.ObjetivosPoliticasPN
+                    .Where(op => op.obj_pn_id == relacion.obj_pn_id && op.estado == "A")
+                    .Include(op => op.Politica)
+                    .Select(p => new PoliticaSimpleDto
+                    {
+                        PoliticaPnId = p.Politica.PoliticaPnId,
+                        Nombre = p.Politica.Nombre,
+                        Descripcion = p.Politica.Descripcion
+                    })
+                    .ToListAsync();
+
+                data.Add(new EjeObjetivoPnExtendedResponse
+                {
+                    EjeObjetivoPnId = relacion.eje_objetivo_pn_id,
+                    Estado = relacion.estado,
+                    FechaCreacion = relacion.fecha_creacion,
+                    Eje = new EjeSimpleDto
+                    {
+                        EjePnId = relacion.Eje.EjePnId,
+                        Nombre = relacion.Eje.Nombre,
+                        Descripcion = relacion.Eje.Descripcion
+                    },
+                    Objetivo = new ObjetivoExtendidoDto
+                    {
+                        ObjPnId = relacion.Objetivo.ObjPnId,
+                        Nombre = relacion.Objetivo.Nombre,
+                        Descripcion = relacion.Objetivo.Descripcion,
+                        Metas = metas,
+                        Politicas = politicas
+                    }
+                });
+            }
+
+            return new PaginatedResponse<EjeObjetivoPnExtendedResponse>
             {
                 Data = data,
                 CurrentPage = page,

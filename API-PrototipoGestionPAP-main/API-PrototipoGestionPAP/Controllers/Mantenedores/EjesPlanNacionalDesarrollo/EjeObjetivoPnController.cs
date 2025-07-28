@@ -32,17 +32,27 @@ namespace API_PrototipoGestionPAP.Controllers.Mantenedores.EjesPlanNacionalDesar
             }
         }
 
-        [HttpGet]
+        [HttpGet("paginated")]
         public async Task<IActionResult> GetAllPaginated([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
                 var result = await _service.GetAllPaginatedAsync(page, pageSize);
-                return Ok(new { Code = 200, Message = "Relaciones obtenidas correctamente.", Data = result });
+                return Ok(new
+                {
+                    Code = 200,
+                    Message = "Relaciones obtenidas correctamente.",
+                    Data = result
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Code = 500, Message = "Error interno del servidor.", Details = ex.Message });
+                return StatusCode(500, new
+                {
+                    Code = 500,
+                    Message = "Error interno del servidor.",
+                    Details = ex.Message
+                });
             }
         }
 
