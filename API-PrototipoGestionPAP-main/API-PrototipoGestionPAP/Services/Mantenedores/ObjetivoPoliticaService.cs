@@ -71,7 +71,7 @@ namespace API_PrototipoGestionPAP.Services.Mantenedores
             var relacion = new ObjetivoPoliticaPN
             {
                 obj_pn_id = request.ObjPnId,
-                politica_pn_id = request.ObjPnId,
+                politica_pn_id = request.PoliticaPnId,
                 estado = "A",
                 fecha_creacion = DateTime.UtcNow
             };
